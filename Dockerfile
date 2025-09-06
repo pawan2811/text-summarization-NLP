@@ -1,13 +1,22 @@
-FROM python:3.8-slim-buster
+# Use a newer base image with active repositories
+FROM python:3.8-slim-bullseye
 
-RUN apt update -y && apt install awscli -y
+# Install system dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends awscli && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
+# Copy all project files
 COPY . /app
 
-RUN pip install -r requirements.txt
-RUN pip install --upgrade accelerate
-RUN pip uninstall -y transformers accelerate
-RUN pip install transformers accelerate
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Upgrade accelerate and ensure latest transformers & accelerate
+RUN pip install --no-cache-dir --upgrade accelerate transformers
+
+# Set default command
 CMD ["python3", "app.py"]
